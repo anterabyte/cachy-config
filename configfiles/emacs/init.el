@@ -25,6 +25,7 @@
 (setq backup-directory-alist '((".*" . "~/.Trash")))
 
 ;; Remove some noisy elements and add some new ones 😛
+(setq inhibit-startup-message t)
 (scroll-bar-mode 0)
 (display-battery-mode 1)
 (display-time-mode 1)
@@ -32,7 +33,7 @@
 (menu-bar-mode 0)
 
 ;; Set Fonts
-(set-face-attribute 'default nil :family "Fira Code Retina" :height 122)
+(set-face-attribute 'default nil :family "Fira Code Retina" :height 130)
 (set-face-attribute 'variable-pitch nil :font "Fira Code Retina" :height 108)
 (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height 108)
 
@@ -43,24 +44,52 @@
 (dolist (mode '(org-mode-hook
 		eshell-mode-hook
 		shell-mode-hook
+		dirvish-mode-hook
 		dired-mode-hook
 		term-mode-hook
 		vterm-mode-hook
 		vterm-toggle-mode-hook
 		neotree-mode-hook
 		eww-mode-hook
+		gptel-mode-hook
 		))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 ;; Transparency
 (add-to-list 'default-frame-alist '(alpha-background . 90))
 
-;; key-bindings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;                                                                      KEY-BINDINGS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; SETUP some prefix for some actions
+(define-prefix-command 'eglot-lsp)
+(define-prefix-command 'emacs-buffer)
+(define-prefix-command 'list-themes)
+(define-prefix-command 'windows)
+(define-prefix-command 'neotree)
+
+;; Advance keybindings
+(global-set-key (kbd "C-c l") 'eglot-lsp)
+(global-set-key (kbd "C-c e") 'emacs-buffer)
+(global-set-key (kbd "C-c t") 'list-themes)
+(global-set-key (kbd "C-c w") 'windows)
+(global-set-key (kbd "C-c n") 'neotree)
+
+;; Basic key-bindings
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 (global-set-key (kbd "s-f") 'toggle-frame-fullscreen)
 
-;; load theme
-(load-theme 'deeper-blue)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;                                                                     UI-UX
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package doom-themes
+  ;; load themes
+  :ensure t
+  :config
+  (load-theme 'doom-snazzy t)
+  )
 
 ;; Spacious Padding Mode
 (use-package spacious-padding
@@ -96,7 +125,6 @@
   (ivy-mode 1)
   )
 
-
 (use-package counsel
   :bind (("M-x" . counsel-M-x)
          ("C-x b" . counsel-switch-buffer)
@@ -113,7 +141,6 @@
   (ivy-rich-mode t)
   )
 
-
 (use-package all-the-icons-ivy-rich
   :ensure t
   :init (all-the-icons-ivy-rich-mode 1))
@@ -125,10 +152,17 @@
   :init
   (which-key-mode t)
   )
-;; File-tree-manager
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;                                                                         FILE-MANAGER                                                                              ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (use-package neotree
   :bind (
-	 ("C-x M-t" . neotree-toggle)
+	 :map neotree
+	      ("t" . neotree-toggle)
+	      ("n" . neotree-create-node)
 	 )
   :config
   (setq neo-smart-open t
@@ -141,16 +175,11 @@
 	)
   )
 
-;; LSP MODE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;                                                                  LSP AND PROGRAMMING MODES                                                                        ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define-prefix-command 'eglot-lsp)
-(define-prefix-command 'emacs-buffer)
-(define-prefix-command 'list-themes)
-(define-prefix-command 'windows)
-(global-set-key (kbd "C-c l") 'eglot-lsp)
-(global-set-key (kbd "C-c e") 'emacs-buffer)
-(global-set-key (kbd "C-c t") 'list-themes)
-(global-set-key (kbd "C-c w") 'windows)
+;; LSP MODE and PROGRAMMING MODES
 
 (use-package eglot
   :diminish
@@ -160,6 +189,17 @@
 	      ("e" . eglot)
 	 )
   )
+
+(use-package company
+  :init (global-company-mode 1)
+  :hook (prog-mode . company-mode)
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
+
 
 ;; Packages for programming-modes
 (use-package python-mode
@@ -174,6 +214,7 @@
 	     ("v" . eval-buffer)
 	     ("q" . revert-buffer-quick)
 	     ("k" . kill-buffer)
+	     ("b" . cousel-switch-buffer)
 	:map list-themes
 	     ("t" . counsel-load-theme)
 	:map windows
@@ -185,5 +226,35 @@
 	)
   )
 
+(use-package yaml-mode
+  :mode "\\.y?ml\\'"
+  :hook (yaml-mode . eglot-ensure)
+  )
+
 (use-package vterm)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;                                                                            PROJECT.EL
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(require 'project)
+
+(use-package dashboard
+  :ensure t 
+  :init
+  (setq initial-buffer-choice 'dashboard-open)
+  (setq dashboard-banner-logo-title "Editor of the century")
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-startup-banner "~/.config/emacs/images/emacs-logo-3.webp")
+  (setq dashboard-center-content t)
+  (setq dashboard-items '((recents  . 5)
+                        (bookmarks . 5)
+                        (projects . 3)
+                        (agenda . 3)
+                        (registers . 3)))
+  (setq dashboard-icon-type 'all-the-icons) 
+)
+
+(use-package consult)
 
