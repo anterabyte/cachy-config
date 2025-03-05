@@ -68,6 +68,7 @@
 (define-prefix-command 'list-themes)
 (define-prefix-command 'windows)
 (define-prefix-command 'neotree)
+(define-prefix-command 'consult)
 
 ;; Advance keybindings
 (global-set-key (kbd "C-c l") 'eglot-lsp)
@@ -75,6 +76,7 @@
 (global-set-key (kbd "C-c t") 'list-themes)
 (global-set-key (kbd "C-c w") 'windows)
 (global-set-key (kbd "C-c n") 'neotree)
+(global-set-key (kbd "C-c c") 'consult)
 
 ;; Basic key-bindings
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
@@ -208,13 +210,18 @@
 (use-package go-mode
   :hook (go-mode . eglot-ensure))
 
+(use-package yaml-mode
+  :mode "\\.y?ml\\'"
+  :hook (yaml-mode . eglot-ensure)
+  )
+
 (use-package emacs
   :bind(
 	:map emacs-buffer
 	     ("v" . eval-buffer)
 	     ("q" . revert-buffer-quick)
 	     ("k" . kill-buffer)
-	     ("b" . cousel-switch-buffer)
+	     ("b" . counsel-switch-buffer)
 	:map list-themes
 	     ("t" . counsel-load-theme)
 	:map windows
@@ -226,9 +233,12 @@
 	)
   )
 
-(use-package yaml-mode
-  :mode "\\.y?ml\\'"
-  :hook (yaml-mode . eglot-ensure)
+(use-package consult
+
+  :bind(
+	:map consult
+	     ("f" . consult-flymake)
+	)
   )
 
 (use-package vterm)
