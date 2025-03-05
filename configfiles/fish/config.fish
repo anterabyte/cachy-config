@@ -2,12 +2,12 @@ source /usr/share/cachyos-fish-config/conf.d/done.fish
 
 
 set_color yellow && echo "
-██╗  ██╗██╗       ██████╗ ██╗   ██╗██████╗ ██╗   ██╗██╗  ██╗██╗  ██╗
-██║  ██║██║       ██╔══██╗██║   ██║██╔══██╗██║   ██║██║ ██╔╝██║  ██║
-███████║██║       ██████╔╝██║   ██║██████╔╝██║   ██║█████╔╝ ███████║
-██╔══██║██║       ██╔═══╝ ██║   ██║██╔══██╗██║   ██║██╔═██╗ ██╔══██║
-██║  ██║██║▄█╗    ██║     ╚██████╔╝██║  ██║╚██████╔╝██║  ██╗██║  ██║
-╚═╝  ╚═╝╚═╝╚═╝    ╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
+ ██████╗ ██╗   ██╗██████╗ ██╗   ██╗██╗  ██╗██╗  ██╗
+ ██╔══██╗██║   ██║██╔══██╗██║   ██║██║ ██╔╝██║  ██║
+ ██████╔╝██║   ██║██████╔╝██║   ██║█████╔╝ ███████║
+ ██╔═══╝ ██║   ██║██╔══██╗██║   ██║██╔═██╗ ██╔══██║
+ ██║     ╚██████╔╝██║  ██║╚██████╔╝██║  ██╗██║  ██║
+ ╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
                                                                     
 "
 
@@ -144,4 +144,22 @@ alias jctl="journalctl -p 3 -xb"
 
 # Recent installed packages
 alias rip="expac --timefmt='%Y-%m-%d %T' '%l\t%n %v' | sort | tail -200 | nl"
+
+# Important aliases
+alias nx="nvim"
+alias tmux="tmux -u -f ~/.config/tmux/.tmux.conf"
+alias k8s="kubectl"
+
+# set cargo path
+set --export PATH $HOME/.cargo/bin $PATH
+
+# Flatpak enable on fish
+set -l xdg_data_home $XDG_DATA_HOME ~/.local/share
+set -gx --path XDG_DATA_DIRS $xdg_data_home[1]/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
+
+for flatpakdir in ~/.local/share/flatpak/exports/bin /var/lib/flatpak/exports/bin
+    if test -d $flatpakdir
+        contains $flatpakdir $PATH; or set -a PATH $flatpakdir
+    end
+end
 
